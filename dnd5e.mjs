@@ -10,7 +10,7 @@
 
 // Import Configuration
 import DND5E from "./module/config.mjs";
-import registerSystemSettings from "./module/settings.mjs";
+import { registerSystemKeybindings, registerSystemSettings } from "./module/settings.mjs";
 
 // Import Submodules
 import * as advancement from "./module/advancement/_module.mjs";
@@ -96,6 +96,7 @@ Hooks.once("init", function() {
 
   // Register System Settings
   registerSystemSettings();
+  registerSystemKeybindings();
 
   // Remove honor & sanity from configuration if they aren't enabled
   if ( !game.settings.get("dnd5e", "honorScore") ) {
