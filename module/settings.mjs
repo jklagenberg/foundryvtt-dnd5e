@@ -3,7 +3,7 @@ import { ModuleArtConfig } from "./module-art.mjs";
 /**
  * Register all of the system's settings.
  */
-export default function registerSystemSettings() {
+export function registerSystemSettings() {
   // Internal System Migration Version
   game.settings.register("dnd5e", "systemMigrationVersion", {
     name: "System Migration Version",
@@ -231,5 +231,56 @@ export default function registerSystemSettings() {
         tokens: true
       }
     }
+  });
+}
+
+/**
+ * Register all of the system's keybindings.
+ */
+export function registerSystemKeybindings() {
+  game.keybindings.register("dnd5e", "d20RollFastForwardNormal", {
+    name: "KEYBINDINGS.DND5E.D20RollFastForwardNormal",
+    editable: [
+      { key: "ShiftLeft" },
+      { key: "ShiftRight" }
+    ]
+  });
+
+  game.keybindings.register("dnd5e", "d20RollFastForwardAdvantage", {
+    name: "KEYBINDINGS.DND5E.D20RollFastForwardAdvantage",
+    editable: [
+      { key: "AltLeft" },
+      { key: "AltRight" }
+    ]
+  });
+
+  game.keybindings.register("dnd5e", "d20RollFastForwardDisadvantage", {
+    name: "KEYBINDINGS.DND5E.D20RollFastForwardDisadvantage",
+    editable: [
+      { key: "CtrlLeft" },
+      { key: "CtrlRight" },
+      { key: "MetaLeft" },
+      { key: "MetaRight" }
+    ]
+  });
+
+  game.keybindings.register("dnd5e", "damageRollFastForwardNormal", {
+    name: "KEYBINDINGS.DND5E.DamageRollFastForwardNormal",
+    editable: [
+      { key: "ShiftLeft" },
+      { key: "ShiftRight" },
+      { key: "CtrlLeft" },
+      { key: "CtrlRight" },
+      { key: "MetaLeft" },
+      { key: "MetaRight" }
+    ]
+  });
+
+  game.keybindings.register("dnd5e", "damageRollFastForwardCritical", {
+    name: "KEYBINDINGS.DND5E.DamageRollFastForwardCritical",
+    editable: [
+      { key: "AltLeft" },
+      { key: "AltRight" }
+    ]
   });
 }
