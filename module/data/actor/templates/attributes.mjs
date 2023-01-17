@@ -4,6 +4,17 @@ import { FormulaField } from "../../fields.mjs";
  * Shared contents of the attributes schema between various actor types.
  */
 export default class AttributesFields {
+
+  /**
+   * Default length unit used for movement and senses based on length units mode.
+   * @type {string}
+   */
+  static get #defaultUnit() {
+    return CONFIG.DND5E.defaultUnits.length[game.settings.get("dnd5e", "metricLengthUnits") ? "metric" : "imperial"];
+  }
+
+  /* -------------------------------------------- */
+
   /**
    * Fields shared between characters, NPCs, and vehicles.
    *
@@ -42,7 +53,7 @@ export default class AttributesFields {
         walk: new foundry.data.fields.NumberField({
           nullable: false, min: 0, step: 0.1, initial: 30, label: "DND5E.MovementWalk"
         }),
-        units: new foundry.data.fields.StringField({initial: "ft", label: "DND5E.MovementUnits"}),
+        units: new foundry.data.fields.StringField({initial: this.#defaultUnit, label: "DND5E.MovementUnits"}),
         hover: new foundry.data.fields.BooleanField({label: "DND5E.MovementHover"})
       }, {label: "DND5E.Movement"})
     };
@@ -85,7 +96,7 @@ export default class AttributesFields {
         truesight: new foundry.data.fields.NumberField({
           required: true, nullable: false, integer: true, min: 0, initial: 0, label: "DND5E.SenseTruesight"
         }),
-        units: new foundry.data.fields.StringField({required: true, initial: "ft", label: "DND5E.SenseUnits"}),
+        units: new foundry.data.fields.StringField({initial: this.#defaultUnit, label: "DND5E.SenseUnits"}),
         special: new foundry.data.fields.StringField({required: true, label: "DND5E.SenseSpecial"})
       }, {label: "DND5E.Senses"}),
       spellcasting: new foundry.data.fields.StringField({
