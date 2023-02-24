@@ -9,6 +9,8 @@
  * @param {number} [options.fumble]              The value of d20 result which represents a critical failure
  * @param {(number)} [options.targetValue]       Assign a target value against which the result of this roll should be
  *                                               compared
+ * @param {number} [options.minimum]             The minimum result of the roll
+ * 
  * @param {boolean} [options.elvenAccuracy=false]      Allow Elven Accuracy to modify this roll?
  * @param {boolean} [options.halflingLucky=false]      Allow Halfling Luck to modify this roll?
  * @param {boolean} [options.reliableTalent=false]     Allow Reliable Talent to modify this roll?
@@ -143,8 +145,11 @@ export default class D20Roll extends Roll {
     // Halfling Lucky
     if ( this.options.halflingLucky ) d20.modifiers.push("r1=1");
 
+    // Roll Minimum
+    if ( this.options.minimum ) d20.modifiers.push(`min${this.options.minimum}`);
+
     // Reliable Talent
-    if ( this.options.reliableTalent ) d20.modifiers.push("min10");
+    if ( this.options.reliableTalent && !(this.options.minimum && this.options.minimum > 10) ) d20.modifiers.push("min10");
 
     // Handle Advantage or Disadvantage
     if ( this.hasAdvantage ) {
@@ -209,13 +214,14 @@ export default class D20Roll extends Roll {
    * @param {number} [data.defaultAction]     The button marked as default
    * @param {boolean} [data.chooseModifier]   Choose which ability modifier should be applied to the roll?
    * @param {string} [data.defaultAbility]    For tool rolls, the default ability modifier applied to the roll
+   * @param {string} [data.skillId]           For skill rolls, the skillId of the skill that is being rolled
    * @param {string} [data.template]          A custom path to an HTML template to use instead of the default
    * @param {object} options                  Additional Dialog customization options
    * @returns {Promise<D20Roll|null>}         A resulting D20Roll object constructed with the dialog, or null if the
    *                                          dialog was closed
    */
   async configureDialog({title, defaultRollMode, defaultAction=D20Roll.ADV_MODE.NORMAL, chooseModifier=false,
-    defaultAbility, template}={}, options={}) {
+    defaultAbility, skillId, template}={}, options={}) {
 
     // Render the Dialog inner HTML
     const content = await renderTemplate(template ?? this.constructor.EVALUATION_TEMPLATE, {
@@ -241,15 +247,15 @@ export default class D20Roll extends Roll {
         buttons: {
           advantage: {
             label: game.i18n.localize("DND5E.Advantage"),
-            callback: html => resolve(this._onDialogSubmit(html, D20Roll.ADV_MODE.ADVANTAGE))
+            callback: html => resolve(this._onDialogSubmit(html, D20Roll.ADV_MODE.ADVANTAGE, skillId))
           },
           normal: {
             label: game.i18n.localize("DND5E.Normal"),
-            callback: html => resolve(this._onDialogSubmit(html, D20Roll.ADV_MODE.NORMAL))
+            callback: html => resolve(this._onDialogSubmit(html, D20Roll.ADV_MODE.NORMAL, skillId))
           },
           disadvantage: {
             label: game.i18n.localize("DND5E.Disadvantage"),
-            callback: html => resolve(this._onDialogSubmit(html, D20Roll.ADV_MODE.DISADVANTAGE))
+            callback: html => resolve(this._onDialogSubmit(html, D20Roll.ADV_MODE.DISADVANTAGE, skillId))
           }
         },
         default: defaultButton,
@@ -264,10 +270,10 @@ export default class D20Roll extends Roll {
    * Handle submission of the Roll evaluation configuration Dialog
    * @param {jQuery} html            The submitted dialog content
    * @param {number} advantageMode   The chosen advantage mode
-   * @returns {D20Roll}              This damage roll.
-   * @private
+   * @returns {D20Roll}              This d20 roll.
+   * @protected
    */
-  _onDialogSubmit(html, advantageMode) {
+  _onDialogSubmit(html, advantageMode, skillId) {
     const form = html[0].querySelector("form");
 
     // Append a situational bonus term
@@ -286,6 +292,11 @@ export default class D20Roll extends Roll {
           const bonus = abl.bonuses?.check;
           if ( bonus ) return new Roll(bonus, this.data).terms;
           return new NumericTerm({number: 0});
+        }
+        // Update the minimum roll
+        if ( t.modifiers ){
+          const minimum = Math.max(abl.minimum?.check || 0, this.data.skills[skillId]?.minimum || 0);
+          this.options.minimum = minimum;
         }
         return t;
       });

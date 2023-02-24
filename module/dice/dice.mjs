@@ -24,6 +24,7 @@
  * @property {boolean} [elvenAccuracy]   Allow Elven Accuracy to modify this roll?
  * @property {boolean} [halflingLucky]   Allow Halfling Luck to modify this roll?
  * @property {boolean} [reliableTalent]  Allow Reliable Talent to modify this roll?
+ * @property {number} [minimum]         Apply minimum value to the roll (if specified)
  *
  * ## Roll Configuration Dialog
  * @property {boolean} [fastForward]           Should the roll configuration dialog be skipped?
@@ -51,7 +52,7 @@
 export async function d20Roll({
   parts=[], data={}, event,
   advantage, disadvantage, critical=20, fumble=1, targetValue,
-  elvenAccuracy, halflingLucky, reliableTalent,
+  elvenAccuracy, halflingLucky, reliableTalent, minimum,
   fastForward, chooseModifier=false, template, title, dialogOptions,
   chatMessage=true, messageData={}, rollMode, flavor
 }={}) {
@@ -78,7 +79,8 @@ export async function d20Roll({
     targetValue,
     elvenAccuracy,
     halflingLucky,
-    reliableTalent
+    reliableTalent,
+    minimum
   });
 
   // Prompt a Dialog to further configure the D20Roll
@@ -89,6 +91,7 @@ export async function d20Roll({
       defaultRollMode,
       defaultAction: advantageMode,
       defaultAbility: data?.item?.ability || data?.defaultAbility,
+      skillId: messageData["flags.dnd5e.roll"]?.skillId,
       template
     }, dialogOptions);
     if ( configured === null ) return null;

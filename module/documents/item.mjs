@@ -644,6 +644,17 @@ export default class Item5e extends Item {
   /* -------------------------------------------- */
 
   /**
+   * Retrieve an item's minimum attack roll.
+   * @returns {number|null}  The minimum roll value that should be applied to the attack roll formula.
+   */
+  getMinimumAttackRoll() {
+    if ( !this.hasAttack ) return null;
+    return this.actor.flags.dnd5e?.minimumAttackRoll ?? null;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
    * Populates the max uses of an item.
    * If the item is an owned item and the `max` is not numeric, calculate based on actor data.
    */
@@ -1380,6 +1391,9 @@ export default class Item5e extends Item {
       ammoUpdate = usage.resourceUpdates ?? [];
     }
 
+    // Get minimum roll
+    const minimum = this.getMinimumAttackRoll();
+
     // Flags
     const elvenAccuracy = (flags.elvenAccuracy
       && CONFIG.DND5E.characterFlags.elvenAccuracy.abilities.includes(this.abilityMod)) || undefined;
@@ -1393,6 +1407,7 @@ export default class Item5e extends Item {
       flavor: title,
       elvenAccuracy,
       halflingLucky: flags.halflingLucky,
+      minimum,
       dialogOptions: {
         width: 400,
         top: options.event ? options.event.clientY - 80 : null,
@@ -1770,6 +1785,9 @@ export default class Item5e extends Item {
       rollData.checkBonus = Roll.replaceFormulaData(globalBonus.check, rollData);
     }
 
+    // Add minimum roll
+    const minimum = getProperty(rollData, `abilities.${abl}.minimum.check`);
+
     // Compose the roll data
     const rollConfig = foundry.utils.mergeObject({
       data: rollData,
@@ -1783,6 +1801,7 @@ export default class Item5e extends Item {
       chooseModifier: true,
       halflingLucky: this.actor.getFlag("dnd5e", "halflingLucky" ),
       reliableTalent: (this.system.proficient >= 1) && this.actor.getFlag("dnd5e", "reliableTalent"),
+      minimum,
       messageData: {
         speaker: options.speaker || ChatMessage.getSpeaker({actor: this.actor}),
         "flags.dnd5e.roll": {type: "tool", itemId: this.id, itemUuid: this.uuid}

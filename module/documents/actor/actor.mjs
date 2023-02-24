@@ -1064,6 +1064,9 @@ export default class Actor5e extends Actor {
       data.skillBonus = Roll.replaceFormulaData(globalBonuses.skill, data);
     }
 
+    // Calculate skill minimum roll
+    const skillMinimum = Math.max(skl?.minimum ?? 0, abl?.minimum?.check ?? 0) || false;
+    
     // Reliable Talent applies to any skill check we have full or better proficiency in
     const reliableTalent = (skl.value >= 1 && this.getFlag("dnd5e", "reliableTalent"));
 
@@ -1076,6 +1079,7 @@ export default class Actor5e extends Actor {
       chooseModifier: true,
       halflingLucky: this.getFlag("dnd5e", "halflingLucky"),
       reliableTalent,
+      minimum: skillMinimum,
       messageData: {
         speaker: options.speaker || ChatMessage.getSpeaker({actor: this}),
         "flags.dnd5e.roll": {type: "skill", skillId }
@@ -1174,6 +1178,9 @@ export default class Actor5e extends Actor {
       data.checkBonus = Roll.replaceFormulaData(globalBonuses.check, data);
     }
 
+    // Add Check Minimum
+    const abilityCheckMinimum = abl?.minimum?.check;
+
     // Roll and return
     const flavor = game.i18n.format("DND5E.AbilityPromptTitle", {ability: label});
     const rollData = foundry.utils.mergeObject({
@@ -1181,6 +1188,7 @@ export default class Actor5e extends Actor {
       title: `${flavor}: ${this.name}`,
       flavor,
       halflingLucky: this.getFlag("dnd5e", "halflingLucky"),
+      minimum: abilityCheckMinimum,
       messageData: {
         speaker: options.speaker || ChatMessage.getSpeaker({actor: this}),
         "flags.dnd5e.roll": {type: "ability", abilityId }
@@ -1253,6 +1261,9 @@ export default class Actor5e extends Actor {
       data.saveBonus = Roll.replaceFormulaData(globalBonuses.save, data);
     }
 
+    // Ability-specific check bonus
+    const abilitySaveMinimum = abl?.minimum?.save;
+
     // Roll and return
     const flavor = game.i18n.format("DND5E.SavePromptTitle", {ability: label});
     const rollData = foundry.utils.mergeObject({
@@ -1260,6 +1271,7 @@ export default class Actor5e extends Actor {
       title: `${flavor}: ${this.name}`,
       flavor,
       halflingLucky: this.getFlag("dnd5e", "halflingLucky"),
+      minimum: abilitySaveMinimum,
       messageData: {
         speaker: options.speaker || ChatMessage.getSpeaker({actor: this}),
         "flags.dnd5e.roll": {type: "save", abilityId }
