@@ -982,6 +982,19 @@ preLocalize("movementUnits");
 /* -------------------------------------------- */
 
 /**
+ * Default units used for imperial & metric settings.
+ * @enum {object}
+ */
+DND5E.defaultUnits = {
+  length: {
+    imperial: "ft",
+    metric: "m"
+  }
+};
+
+/* -------------------------------------------- */
+
+/**
  * The types of range that are used for measuring actions and effects.
  * @enum {string}
  */

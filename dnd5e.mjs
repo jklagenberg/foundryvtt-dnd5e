@@ -314,6 +314,16 @@ Hooks.on("renderChatLog", (app, html, data) => documents.Item5e.chatListeners(ht
 Hooks.on("renderChatPopout", (app, html, data) => documents.Item5e.chatListeners(html));
 Hooks.on("getActorDirectoryEntryContext", documents.Actor5e.addDirectoryContextOptions);
 
+Hooks.on("preCreateScene", (doc, createData, options, userId) => {
+  if ( userId !== game.user.id ) return;
+  // Set default grid units based on metric length setting
+  if ( !foundry.utils.getProperty(createData, "grid.units") ) doc.updateSource({
+    "grid.units": CONFIG.DND5E.defaultUnits.length[
+      game.settings.get("dnd5e", "metricLengthUnits") ? "metric" : "imperial"
+    ]
+  });
+});
+
 /* -------------------------------------------- */
 /*  Bundled Module Exports                      */
 /* -------------------------------------------- */

@@ -182,10 +182,20 @@ export default function registerSystemSettings() {
     }
   });
 
+  // Metric Length Weights
+  game.settings.register("dnd5e", "metricLengthUnits", {
+    name: "SETTINGS.DND5E.MetricLengthUnitsName",
+    hint: "SETTINGS.DND5E.MetricLengthUnitsHint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
   // Metric Unit Weights
   game.settings.register("dnd5e", "metricWeightUnits", {
-    name: "SETTINGS.5eMetricN",
-    hint: "SETTINGS.5eMetricL",
+    name: "SETTINGS.DND5E.MetricWeightUnitsName",
+    hint: "SETTINGS.DND5E.MetricWeightUnitsHint",
     scope: "world",
     config: true,
     type: Boolean,
