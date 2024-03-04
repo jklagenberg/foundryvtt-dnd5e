@@ -65,7 +65,9 @@ export default class CreatureTemplate extends CommonTemplate {
         bonuses: new foundry.data.fields.SchemaField({
           check: new FormulaField({required: true, label: "DND5E.CheckBonus"})
         }, {label: "DND5E.ToolBonuses"})
-      })),
+      }), {
+        intialValue: this._initialToolValue,
+      }),
       spells: new MappingField(new foundry.data.fields.SchemaField({
         value: new foundry.data.fields.NumberField({
           nullable: false, integer: true, min: 0, initial: 0, label: "DND5E.SpellProgAvailable"
@@ -88,6 +90,20 @@ export default class CreatureTemplate extends CommonTemplate {
    */
   static _initialSkillValue(key, initial) {
     if ( CONFIG.DND5E.skills[key]?.ability ) initial.ability = CONFIG.DND5E.skills[key].ability;
+    return initial;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Populate the proper initial abilities for the tools.
+   * @param {string} key      Key for which the initial data will be created.
+   * @param {object} initial  The initial tool object
+   * @returns {object}        Initial tools object with the ability defined.
+   * @private
+   */
+  static _initialToolValue(key, initial) {
+    if ( CONFIG.DND5E.toolTypeProficiencies[key]?.ability ) initial.ability = CONFIG.DND5E.toolTypeProficiencies[key]?.ability;
     return initial;
   }
 
@@ -157,7 +173,7 @@ export default class CreatureTemplate extends CommonTemplate {
     if ( !original || foundry.utils.isEmpty(original.value) ) return;
     source.tools ??= {};
     for ( const prof of original.value ) {
-      const validProf = (prof in CONFIG.DND5E.toolProficiencies) || (prof in CONFIG.DND5E.toolIds);
+      const validProf = (prof in CONFIG.DND5E._toolProficiencies) || (prof in CONFIG.DND5E.toolIds);
       if ( !validProf || (prof in source.tools) ) continue;
       source.tools[prof] = {
         value: 1,
