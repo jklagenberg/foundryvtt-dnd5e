@@ -187,6 +187,8 @@ export default class Actor5e extends SystemDocumentMixin(Actor) {
     if ( this.system.getRollData ) data = this.system.getRollData({ deterministic });
     else data = {...super.getRollData()};
     data.flags = {...this.flags};
+    data.statuses = {};
+    for ( const status of this.statuses ) data.statuses[status] = 1;
     return data;
   }
 
