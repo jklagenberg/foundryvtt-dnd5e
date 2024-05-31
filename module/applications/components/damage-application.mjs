@@ -161,10 +161,7 @@ export default class DamageApplicationElement extends ChatTrayElement {
       div.querySelector(".collapsible-content").addEventListener("click", event => {
         event.stopImmediatePropagation();
       });
-
-      if ( !this.chatMessage.getFlag("dnd5e", "targets")?.length ) this.targetSourceControl.hidden = true;
       div.addEventListener("click", this._handleClickHeader.bind(this));
-
     }
 
     this.targetingMode = this.targetSourceControl.hidden ? "selected" : "targeted";
