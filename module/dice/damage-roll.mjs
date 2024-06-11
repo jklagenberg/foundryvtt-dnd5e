@@ -1,3 +1,5 @@
+import { Roll5e } from "../dice/_module.mjs";
+
 /**
  * A type of Roll specific to a damage (or healing) roll in the 5e system.
  * @param {string} formula                       The string formula to parse
@@ -9,7 +11,7 @@
  * @param {boolean} [options.powerfulCritical=false]  Apply the "powerful criticals" house rule to critical hits
  * @param {string} [options.criticalBonusDamage]      An extra damage term that is applied only on a critical hit
  */
-export default class DamageRoll extends Roll {
+export default class DamageRoll extends Roll5e {
   constructor(formula, data, options) {
     super(formula, data, options);
     if ( !this.options.preprocessed ) this.preprocessFormula();
@@ -130,7 +132,8 @@ export default class DamageRoll extends Roll {
 
           // Powerful critical - maximize damage and reduce the multiplier by 1
           if ( this.options.powerfulCritical ) {
-            let bonus = DamageRoll.calcDieMaximum(term);
+            const MaxRoll = new Roll5e(term.formula, this.data, term.options);
+            let bonus = MaxRoll.evaluateSync({ maximize: true })?.total ?? 0;
             if ( bonus > 0 ) {
               const flavor = term.flavor?.toLowerCase().trim() ?? game.i18n.localize("DND5E.PowerfulCritical");
               flatBonus.set(flavor, (flatBonus.get(flavor) ?? 0) + bonus);
@@ -176,49 +179,6 @@ export default class DamageRoll extends Roll {
 
     // Mark configuration as complete
     this.options.configured = true;
-  }
-
-  /* -------------------------------------------- */
-
-  /**
-   * Gets die information from passed die and calculates the maximum value that could be rolled.
-   *
-   * @param {DiceTerm} die                   DiceTerm to get the maximum value.
-   * @returns {number}                       Maximum value that could be rolled as an integer.
-   */
-
-  static calcDieMaximum(die) {
-    let face = die.faces;
-    let number = die.number;
-    const currentModifiers = foundry.utils.deepClone(die.modifiers);
-    const validModifiers = {
-      k: "keep",
-      kh: "keep",
-      kl: "keep",
-      d: "drop",
-      dh: "drop",
-      dl: "drop",
-      max: "maximum"
-    };
-
-    for ( let modifier of currentModifiers ) {
-      const rgx = /([Mm][Aa][Xx]|[KkDd][HhLl]?)([\d]+)?/i;
-      const match = modifier.match(rgx);
-      if ( !match ) continue;
-      if (match && match[0].length < match.input.length) currentModifiers.push(match.input.slice(match[0].length));
-      let [command, value] = match.slice(1);
-      command = command.toLowerCase();
-      const amount = parseInt(value) || (command === "max" ? -1 : 1);
-
-      if ( command === "max" & amount >= 0 ) {
-        face = amount > face ? face : amount;
-      }
-      else if ( command in validModifiers & amount > 0 ) {
-        number = amount < number ? amount : number;
-      }
-    }
-
-    return face * number;
   }
 
   /* -------------------------------------------- */
