@@ -1,9 +1,10 @@
 import TraitAdvancement from "../../documents/advancement/trait.mjs";
+import { simplifyBonus } from "../../utils.mjs";
 import { ItemDataModel } from "../abstract.mjs";
 import { AdvancementField, FormulaField, IdentifierField } from "../fields.mjs";
+import SpellcastingField from "./fields/spellcasting-field.mjs";
 import ItemDescriptionTemplate from "./templates/item-description.mjs";
 import StartingEquipmentTemplate from "./templates/starting-equipment.mjs";
-import SpellCastingFields from "./templates/spell-casting.mjs";
 
 const { ArrayField, NumberField, StringField } = foundry.data.fields;
 
@@ -17,9 +18,7 @@ const { ArrayField, NumberField, StringField } = foundry.data.fields;
  * @property {string} hitDice           Denomination of hit dice available as defined in `DND5E.hitDieTypes`.
  * @property {number} hitDiceUsed       Number of hit dice consumed.
  * @property {object[]} advancement     Advancement objects for this class.
- * @property {object} spellcasting      Details on class's spellcasting ability.
- * @property {string} spellcasting.progression  Spell progression granted by class as from `DND5E.spellProgression`.
- * @property {string} spellcasting.ability      Ability score to use for spellcasting.
+ * @property {SpellcastingField} spellcasting  Details on class's spellcasting ability.
  * @property {string} wealth            Formula used to determine starting wealth.
  */
 export default class ClassData extends ItemDataModel.mixin(ItemDescriptionTemplate, StartingEquipmentTemplate) {
@@ -38,7 +37,7 @@ export default class ClassData extends ItemDataModel.mixin(ItemDescriptionTempla
         required: true, nullable: false, integer: true, initial: 0, min: 0, label: "DND5E.HitDiceUsed"
       }),
       advancement: new ArrayField(new AdvancementField(), {label: "DND5E.AdvancementTitle"}),
-      spellcasting: SpellCastingFields.spellCasting,
+      spellcasting: new SpellcastingField(),
       wealth: new FormulaField({label: "DND5E.StartingEquipment.Wealth.Label"})
     });
   }
@@ -143,5 +142,17 @@ export default class ClassData extends ItemDataModel.mixin(ItemDescriptionTempla
     }
 
     if ( needsMigration ) foundry.utils.setProperty(source, "flags.dnd5e.persistSourceMigration", true);
+  }
+
+  /* -------------------------------------------- */
+  /*  Data Preparation                            */
+  /* -------------------------------------------- */
+
+  /** @inheritDoc */
+  prepareFinalData() {
+    this.spellcasting.preparation.max = simplifyBonus(
+      this.spellcasting.preparation.formula,
+      this.parent.getRollData({ deterministic: true})
+    );
   }
 }

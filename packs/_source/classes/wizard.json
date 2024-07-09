@@ -349,7 +349,9 @@
     "spellcasting": {
       "progression": "full",
       "ability": "int",
-      "needToPrepare": true
+      "preparation": {
+        "formula": "@abilities.int.mod + @classes.wizard.levels"
+      }
     },
     "startingEquipment": [
       {
